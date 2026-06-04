@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pages/tutor_page.dart';
+import 'pages/student_page.dart';
+import 'pages/course_page.dart';
+import 'pages/enrollment_page.dart';
 
 void main() {
   runApp(const TutorApp());
@@ -11,7 +14,7 @@ class TutorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tutores Acadêmicos',
+      title: 'Gestão Acadêmica',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -40,7 +43,59 @@ class TutorApp extends StatelessWidget {
           shape: CircleBorder(),
         ),
       ),
-      home: const TutorPage(),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          TutorPage(),
+          StudentPage(),
+          CoursePage(),
+          EnrollmentPage(),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (i) => setState(() => _selectedIndex = i),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school),
+            label: 'Tutores',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Alunos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            selectedIcon: Icon(Icons.menu_book),
+            label: 'Cursos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.assignment_outlined),
+            selectedIcon: Icon(Icons.assignment),
+            label: 'Matrículas',
+          ),
+        ],
+      ),
     );
   }
 }

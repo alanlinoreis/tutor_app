@@ -33,5 +33,35 @@ class AppDatabase {
         email     TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE students (
+        studentId            INTEGER PRIMARY KEY AUTOINCREMENT,
+        name                 TEXT NOT NULL,
+        registrationNumber   TEXT NOT NULL,
+        email                TEXT NOT NULL,
+        course               TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE courses (
+        courseId      INTEGER PRIMARY KEY AUTOINCREMENT,
+        name          TEXT NOT NULL,
+        duration      TEXT NOT NULL,
+        coordinator   TEXT NOT NULL,
+        description   TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE enrollments (
+        enrollmentId     INTEGER PRIMARY KEY AUTOINCREMENT,
+        studentName      TEXT NOT NULL,
+        courseName       TEXT NOT NULL,
+        enrollmentDate   TEXT NOT NULL,
+        status           TEXT NOT NULL
+      )
+    ''');
   }
 }
