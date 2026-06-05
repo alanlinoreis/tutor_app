@@ -113,7 +113,7 @@ class _StudentPageState extends State<StudentPage> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${s.registrationNumber}  •  ${s.course}'),
+                            Text(s.course),
                             if (s.tutorName != null)
                               Text(
                                 'Tutor: ${s.tutorName}',
@@ -179,7 +179,6 @@ class _StudentForm extends StatefulWidget {
 class _StudentFormState extends State<_StudentForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _name;
-  late final TextEditingController _registration;
   late final TextEditingController _email;
   late final TextEditingController _course;
   Tutor? _selectedTutor;
@@ -190,7 +189,6 @@ class _StudentFormState extends State<_StudentForm> {
   void initState() {
     super.initState();
     _name = TextEditingController(text: widget.student?.name);
-    _registration = TextEditingController(text: widget.student?.registrationNumber);
     _email = TextEditingController(text: widget.student?.email);
     _course = TextEditingController(text: widget.student?.course);
 
@@ -206,7 +204,6 @@ class _StudentFormState extends State<_StudentForm> {
   @override
   void dispose() {
     _name.dispose();
-    _registration.dispose();
     _email.dispose();
     _course.dispose();
     super.dispose();
@@ -217,7 +214,6 @@ class _StudentFormState extends State<_StudentForm> {
     final student = Student(
       studentId: widget.student?.studentId,
       name: _name.text.trim(),
-      registrationNumber: _registration.text.trim(),
       email: _email.text.trim(),
       course: _course.text.trim(),
       tutorId: _selectedTutor?.tutorId,
@@ -252,12 +248,6 @@ class _StudentFormState extends State<_StudentForm> {
                 decoration: const InputDecoration(labelText: 'Nome *'),
                 textCapitalization: TextCapitalization.words,
                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o nome' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _registration,
-                decoration: const InputDecoration(labelText: 'Matrícula *'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a matrícula' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(

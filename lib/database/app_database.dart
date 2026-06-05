@@ -19,7 +19,7 @@ class AppDatabase {
 
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -37,13 +37,12 @@ class AppDatabase {
 
     await db.execute('''
       CREATE TABLE students (
-        studentId            INTEGER PRIMARY KEY AUTOINCREMENT,
-        name                 TEXT NOT NULL,
-        registrationNumber   TEXT NOT NULL,
-        email                TEXT NOT NULL,
-        course               TEXT NOT NULL,
-        tutorId              INTEGER,
-        tutorName            TEXT
+        studentId   INTEGER PRIMARY KEY AUTOINCREMENT,
+        name        TEXT NOT NULL,
+        email       TEXT NOT NULL,
+        course      TEXT NOT NULL,
+        tutorId     INTEGER,
+        tutorName   TEXT
       )
     ''');
 
@@ -59,19 +58,37 @@ class AppDatabase {
 
     await db.execute('''
       CREATE TABLE enrollments (
-        enrollmentId     INTEGER PRIMARY KEY AUTOINCREMENT,
-        studentName      TEXT NOT NULL,
-        courseName       TEXT NOT NULL,
-        enrollmentDate   TEXT NOT NULL,
-        status           TEXT NOT NULL
+        enrollmentId       INTEGER PRIMARY KEY AUTOINCREMENT,
+        registrationCode   TEXT NOT NULL,
+        studentName        TEXT NOT NULL,
+        courseName         TEXT NOT NULL,
+        enrollmentDate     TEXT NOT NULL,
+        status             TEXT NOT NULL
       )
     ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('ALTER TABLE students ADD COLUMN tutorId INTEGER');
-      await db.execute('ALTER TABLE students ADD COLUMN tutorName TEXT');
+    if (oldVersion < 3) {
+      // Recria a tabela students sem registrationNumber e com tutorId/tutorName
+      await db.execute('DROP TABLE IF EXISTS students');
+      await db.execute('''
+        CREATE TABLE students (
+          studentId   INTEGER PRIMARY KEY AUTOINCREMENT,
+          name        TEXT NOT NULL,
+          email       TEXT NOT NULL,
+          course      TEXT NOT NULL,
+          tutorId     INTEGER,
+          tutorName   TEXT
+        )
+      ''');
+
+      // Adiciona registrationCode em enrollments (ignorando erro caso já exista)
+      try {
+        await db.execute(
+          'ALTER TABLE enrollments ADD COLUMN registrationCode TEXT NOT NULL DEFAULT ""',
+        );
+      } catch (_) {}
     }
   }
 }

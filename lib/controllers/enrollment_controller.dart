@@ -11,7 +11,16 @@ class EnrollmentController {
   }
 
   Future<void> add(Enrollment enrollment) async {
-    await _repository.insert(enrollment);
+    // Gera o código de matrícula automaticamente no momento do cadastro
+    final code = _generateCode();
+    final withCode = Enrollment(
+      registrationCode: code,
+      studentName: enrollment.studentName,
+      courseName: enrollment.courseName,
+      enrollmentDate: enrollment.enrollmentDate,
+      status: enrollment.status,
+    );
+    await _repository.insert(withCode);
     await load();
   }
 
@@ -23,5 +32,13 @@ class EnrollmentController {
   Future<void> remove(int id) async {
     await _repository.delete(id);
     await load();
+  }
+
+  /// Formato: MAT-AAAAMM-XXXX (ano + mês + 4 dígitos do timestamp)
+  String _generateCode() {
+    final now = DateTime.now();
+    final seq = (now.millisecondsSinceEpoch % 10000).toString().padLeft(4, '0');
+    final month = now.month.toString().padLeft(2, '0');
+    return 'MAT-${now.year}$month-$seq';
   }
 }

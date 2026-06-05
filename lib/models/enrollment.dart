@@ -2,6 +2,7 @@ import '../utils/enrollment_status.dart';
 
 class Enrollment {
   final int? enrollmentId;
+  final String registrationCode; // gerado automaticamente no cadastro
   final String studentName;
   final String courseName;
   final String enrollmentDate;
@@ -9,6 +10,7 @@ class Enrollment {
 
   Enrollment({
     this.enrollmentId,
+    required this.registrationCode,
     required this.studentName,
     required this.courseName,
     required this.enrollmentDate,
@@ -18,6 +20,7 @@ class Enrollment {
   Map<String, dynamic> toMap() {
     return {
       'enrollmentId': enrollmentId,
+      'registrationCode': registrationCode,
       'studentName': studentName,
       'courseName': courseName,
       'enrollmentDate': enrollmentDate,
@@ -28,6 +31,7 @@ class Enrollment {
   factory Enrollment.fromMap(Map<String, dynamic> map) {
     return Enrollment(
       enrollmentId: map['enrollmentId'] as int?,
+      registrationCode: map['registrationCode'] as String? ?? '—',
       studentName: map['studentName'] as String,
       courseName: map['courseName'] as String,
       enrollmentDate: map['enrollmentDate'] as String,
