@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/dashboard_page.dart';
 import 'pages/tutor_page.dart';
 import 'pages/student_page.dart';
 import 'pages/course_page.dart';
@@ -43,19 +44,19 @@ class TutorApp extends StatelessWidget {
           shape: CircleBorder(),
         ),
       ),
-      home: const HomePage(),
+      home: const RootPage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class RootPage extends StatefulWidget {
+  const RootPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<RootPage> createState() => _RootPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _RootPageState extends State<RootPage> {
   int _selectedIndex = 0;
 
   @override
@@ -64,6 +65,7 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
+          DashboardPage(),
           TutorPage(),
           StudentPage(),
           CoursePage(),
@@ -74,6 +76,11 @@ class _HomePageState extends State<HomePage> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Início',
+          ),
           NavigationDestination(
             icon: Icon(Icons.school_outlined),
             selectedIcon: Icon(Icons.school),
