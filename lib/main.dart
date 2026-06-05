@@ -59,22 +59,50 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   int _selectedIndex = 0;
 
+  // Chave única gerada toda vez que o usuário navega para Início,
+  // forçando o DashboardPage a recriar seu estado e recarregar os dados.
+  Key _dashboardKey = UniqueKey();
+
+  void _onDestinationSelected(int index) {
+    if (index == 0) {
+      // Sempre recarrega o dashboard ao navegar para Início
+      setState(() {
+        _selectedIndex = 0;
+        _dashboardKey = UniqueKey();
+      });
+    } else {
+      setState(() => _selectedIndex = index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: const [
-          DashboardPage(),
-          TutorPage(),
-          StudentPage(),
-          CoursePage(),
-          EnrollmentPage(),
+      body: Stack(
+        children: [
+          // Dashboard fora do IndexedStack: recriado a cada navegação para garantir dados frescos
+          Offstage(
+            offstage: _selectedIndex != 0,
+            child: DashboardPage(key: _dashboardKey),
+          ),
+          // As demais abas ficam no IndexedStack para preservar estado (scroll, busca, etc.)
+          Offstage(
+            offstage: _selectedIndex == 0,
+            child: IndexedStack(
+              index: _selectedIndex == 0 ? 0 : _selectedIndex - 1,
+              children: const [
+                TutorPage(),
+                StudentPage(),
+                CoursePage(),
+                EnrollmentPage(),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) => setState(() => _selectedIndex = i),
+        onDestinationSelected: _onDestinationSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
