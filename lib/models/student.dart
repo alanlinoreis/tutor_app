@@ -4,6 +4,8 @@ class Student {
   final String registrationNumber;
   final String email;
   final String course;
+  final int? tutorId;       // FK → tutors.tutorId (nullable: aluno pode não ter tutor)
+  final String? tutorName;  // desnormalizado para exibição rápida
 
   Student({
     this.studentId,
@@ -11,6 +13,8 @@ class Student {
     required this.registrationNumber,
     required this.email,
     required this.course,
+    this.tutorId,
+    this.tutorName,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +24,8 @@ class Student {
       'registrationNumber': registrationNumber,
       'email': email,
       'course': course,
+      'tutorId': tutorId,
+      'tutorName': tutorName,
     };
   }
 
@@ -30,6 +36,8 @@ class Student {
       registrationNumber: map['registrationNumber'] as String,
       email: map['email'] as String,
       course: map['course'] as String,
+      tutorId: map['tutorId'] as int?,
+      tutorName: map['tutorName'] as String?,
     );
   }
 }

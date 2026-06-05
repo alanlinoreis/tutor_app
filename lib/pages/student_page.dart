@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../controllers/student_controller.dart';
 import '../models/student.dart';
+import '../models/tutor.dart';
+import '../repositories/tutor_repository.dart';
 
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
@@ -23,12 +25,18 @@ class _StudentPageState extends State<StudentPage> {
     if (mounted) setState(() {});
   }
 
-  void _showForm({Student? student}) {
+  Future<void> _showForm({Student? student}) async {
+    // Carrega tutores disponíveis para o dropdown
+    final tutors = await TutorRepository().getAll();
+
+    if (!mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (_) => _StudentForm(
         student: student,
+        tutors: tutors,
         onSave: (s) async {
           if (student == null) {
             await _controller.add(s);
@@ -102,7 +110,21 @@ class _StudentPageState extends State<StudentPage> {
                       child: ListTile(
                         leading: CircleAvatar(child: Text(s.name[0].toUpperCase())),
                         title: Text(s.name),
-                        subtitle: Text('${s.registrationNumber}  •  ${s.course}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${s.registrationNumber}  •  ${s.course}'),
+                            if (s.tutorName != null)
+                              Text(
+                                'Tutor: ${s.tutorName}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+                        isThreeLine: s.tutorName != null,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -141,9 +163,14 @@ class _StudentPageState extends State<StudentPage> {
 
 class _StudentForm extends StatefulWidget {
   final Student? student;
+  final List<Tutor> tutors;
   final Future<void> Function(Student) onSave;
 
-  const _StudentForm({this.student, required this.onSave});
+  const _StudentForm({
+    this.student,
+    required this.tutors,
+    required this.onSave,
+  });
 
   @override
   State<_StudentForm> createState() => _StudentFormState();
@@ -155,6 +182,7 @@ class _StudentFormState extends State<_StudentForm> {
   late final TextEditingController _registration;
   late final TextEditingController _email;
   late final TextEditingController _course;
+  Tutor? _selectedTutor;
 
   bool get _isEditing => widget.student != null;
 
@@ -165,6 +193,14 @@ class _StudentFormState extends State<_StudentForm> {
     _registration = TextEditingController(text: widget.student?.registrationNumber);
     _email = TextEditingController(text: widget.student?.email);
     _course = TextEditingController(text: widget.student?.course);
+
+    // Pré-seleciona o tutor se o aluno já tiver um vinculado
+    if (widget.student?.tutorId != null) {
+      _selectedTutor = widget.tutors.firstWhere(
+        (t) => t.tutorId == widget.student!.tutorId,
+        orElse: () => widget.tutors.first,
+      );
+    }
   }
 
   @override
@@ -184,6 +220,8 @@ class _StudentFormState extends State<_StudentForm> {
       registrationNumber: _registration.text.trim(),
       email: _email.text.trim(),
       course: _course.text.trim(),
+      tutorId: _selectedTutor?.tutorId,
+      tutorName: _selectedTutor?.name,
     );
     await widget.onSave(student);
     if (mounted) Navigator.pop(context);
@@ -199,6 +237,7 @@ class _StudentFormState extends State<_StudentForm> {
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -237,6 +276,25 @@ class _StudentFormState extends State<_StudentForm> {
                 decoration: const InputDecoration(labelText: 'Curso *'),
                 textCapitalization: TextCapitalization.words,
                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o curso' : null,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<Tutor?>(
+                initialValue: _selectedTutor,
+                decoration: const InputDecoration(labelText: 'Tutor responsável'),
+                hint: const Text('Sem tutor'),
+                items: [
+                  const DropdownMenuItem<Tutor?>(
+                    value: null,
+                    child: Text('Sem tutor'),
+                  ),
+                  ...widget.tutors.map(
+                    (t) => DropdownMenuItem<Tutor?>(
+                      value: t,
+                      child: Text(t.name),
+                    ),
+                  ),
+                ],
+                onChanged: (t) => setState(() => _selectedTutor = t),
               ),
               const SizedBox(height: 24),
               FilledButton(
